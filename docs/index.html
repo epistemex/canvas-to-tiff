@@ -72,20 +72,21 @@
 
 
     <section class="readme-section">
-        <article><h1>﻿canvas-to-tiff</h1><p>Converts a HTML5 canvas bitmap to a TIFF file (blob, data-uri, array)<br>that can be saved on user's computer or transferred to server.</p>
-<p>The TIFF file is standard compliant (baseline) and support RGB + alpha channel.</p>
+        <article><h1>﻿canvas-to-tiff</h1><p>Converts a HTML5 canvas bitmap to a TIFF file (blob, data-uri, typed array)<br>that can be saved on user's computer or transferred to a server.</p>
+<p>The TIFF file is standard compliant (baseline) and support RGB + alpha<br>channel as well as compression at various compression levels, with option<br>for byte-order (big-endian or little-endian).</p>
 <h2>Features</h2><ul>
 <li>Fast and small!</li>
 <li>All operations are asynchronous and non-blocking</li>
 <li>Supports alpha channel</li>
-<li><strong>NEW</strong> Support optional ZIP compression (requires Pako/Inflate)</li>
-<li>Can convert Canvas to TIFF as ArrayBuffer</li>
-<li>Can convert Canvas to TIFF as Blob</li>
-<li>Can convert Canvas to TIFF as Data-URI</li>
-<li>Saves in both big-endian (default) and little-endian (option) format</li>
-<li>Arbitrary DPI for both X and Y directions can be set using options.</li>
-<li>No dependencies</li>
+<li>Supports ZIP compression (default)</li>
+<li>Can convert directly to ArrayBuffer</li>
+<li>Can convert directly to Blob</li>
+<li>Can convert directly to Data-URI</li>
+<li>Can save both in big-endian (default) or little-endian byte order.</li>
+<li>Arbitrary DPI for both X and Y directions can be set.</li>
 <li>Documented source incl. HTML version (see docs/ folder)</li>
+<li>Works with all major browsers incl. IE</li>
+<li>No dependencies</li>
 </ul>
 <h2>Install</h2><p><strong>canvas-to-tiff</strong> can be installed in various ways:</p>
 <ul>
@@ -111,11 +112,14 @@
 });</code></pre><p>To convert it to an ArrayBuffer that can be sent over the net:</p>
 <pre class="prettyprint source"><code>CanvasToTIFF.toArrayBuffer(canvas, function(buffer) {
     // buffer is ArrayBuffer with the TIFF file
-});</code></pre><p>Setting an error handler (before calling other operations):</p>
-<pre class="prettyprint source"><code>CanvasToTIFF.setErrorHandler(myErrorHandlerFunc);</code></pre><p><strong>NOTE:</strong> As with with ordinary canvas, cross-origin resource sharing<br>(CORS) requirements must be fulfilled.</p>
+});</code></pre><p>Also see demos/test.html for sample use of compression and byte-order options.</p>
+<p><strong>NOTE:</strong> Cross-Origin Resource Sharing (CORS) requirements must be fulfilled.</p>
 <h2>Issues</h2><p>See the <a href="https://github.com/epistemex/canvas-to-tiff/issues">issue tracker</a> for details.</p>
+<h2>Related</h2><ul>
+<li><a href="https://github.com/epistemex/canvas-to-bmp">canvas-to-bmp</a></li>
+</ul>
 <h2>Credits</h2><ul>
-<li>The <a href="https://github.com/nodeca/pako">pako deflate decompression code</a> was written by Andrey Tupitsin (@anrd83) and Vitaly Puzrin (@puzrin)</li>
+<li>The <a href="https://github.com/nodeca/pako">pako deflate compression code</a> was written by Andrey Tupitsin (@anrd83) and Vitaly Puzrin (@puzrin)</li>
 </ul>
 <h2>License</h2><p>Released under <a href="http://choosealicense.com/licenses/mit/">MIT license</a>. You may use this class in both commercial and non-commercial projects provided that full header (minified and developer versions) is included.</p>
 <p><em>&copy; Epistemex 2015-2016</em></p>

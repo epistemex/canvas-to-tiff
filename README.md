@@ -1,11 +1,12 @@
 ﻿canvas-to-tiff
 ==============
 
-Converts a HTML5 canvas bitmap to a TIFF file (blob, data-uri, array)
-that can be saved on user's computer or transferred to server.
+Converts a HTML5 canvas bitmap to a TIFF file (blob, data-uri, typed array)
+that can be saved on user's computer or transferred to a server.
 
-The TIFF file is standard compliant (baseline) and support RGB + alpha channel
-as well as compression.
+The TIFF file is standard compliant (baseline) and support RGB + alpha
+channel as well as compression at various compression levels, with option 
+for byte-order (big-endian or little-endian).
 
 
 Features
@@ -14,12 +15,12 @@ Features
 - Fast and small!
 - All operations are asynchronous and non-blocking
 - Supports alpha channel
-- Can convert Canvas to TIFF as ArrayBuffer
-- Can convert Canvas to TIFF as Blob
-- Can convert Canvas to TIFF as Data-URI
-- Supports optional ZIP compression
-- Saves in both big-endian (default) and little-endian (option) format
-- Arbitrary DPI for both X and Y directions can be set using options.
+- Supports ZIP compression (default)
+- Can convert directly to ArrayBuffer
+- Can convert directly to Blob
+- Can convert directly to Data-URI
+- Can save both in big-endian (default) or little-endian byte order.
+- Arbitrary DPI for both X and Y directions can be set.
 - Documented source incl. HTML version (see docs/ folder)
 - Works with all major browsers incl. IE
 - No dependencies
@@ -70,12 +71,9 @@ To convert it to an ArrayBuffer that can be sent over the net:
         // buffer is ArrayBuffer with the TIFF file
     });
 
-Setting an error handler (before calling other operations):
+Also see demos/test.html for sample use of compression and byte-order options.
 
-    CanvasToTIFF.setErrorHandler(myErrorHandlerFunc);
-
-**NOTE:** As with with ordinary canvas, cross-origin resource sharing 
-(CORS) requirements must be fulfilled.
+**NOTE:** Cross-Origin Resource Sharing (CORS) requirements must be fulfilled.
 
 
 Issues
@@ -84,10 +82,16 @@ Issues
 See the [issue tracker](https://github.com/epistemex/canvas-to-tiff/issues) for details.
 
 
+Related
+-------
+
+- [canvas-to-bmp](https://github.com/epistemex/canvas-to-bmp)
+
+
 Credits
 -------
 
-- The [pako deflate decompression code](https://github.com/nodeca/pako) was written by Andrey Tupitsin (@anrd83) and Vitaly Puzrin (@puzrin)
+- The [pako deflate compression code](https://github.com/nodeca/pako) was written by Andrey Tupitsin (@anrd83) and Vitaly Puzrin (@puzrin)
 
 
 License
