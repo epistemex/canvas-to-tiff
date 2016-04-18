@@ -17,11 +17,12 @@ Features
 - Can convert Canvas to TIFF as ArrayBuffer
 - Can convert Canvas to TIFF as Blob
 - Can convert Canvas to TIFF as Data-URI
-- **NEW** Support optional ZIP compression
+- Supports optional ZIP compression
 - Saves in both big-endian (default) and little-endian (option) format
 - Arbitrary DPI for both X and Y directions can be set using options.
-- No dependencies
 - Documented source incl. HTML version (see docs/ folder)
+- Works with all major browsers incl. IE
+- No dependencies
 
 
 Install
