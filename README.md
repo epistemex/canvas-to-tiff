@@ -4,7 +4,8 @@
 Converts a HTML5 canvas bitmap to a TIFF file (blob, data-uri, array)
 that can be saved on user's computer or transferred to server.
 
-The TIFF file is standard compliant (baseline) and support RGB + alpha channel.
+The TIFF file is standard compliant (baseline) and support RGB + alpha channel
+as well as compression.
 
 
 Features
@@ -13,10 +14,10 @@ Features
 - Fast and small!
 - All operations are asynchronous and non-blocking
 - Supports alpha channel
-- **NEW** Support optional ZIP compression (requires Pako/Inflate)
 - Can convert Canvas to TIFF as ArrayBuffer
 - Can convert Canvas to TIFF as Blob
 - Can convert Canvas to TIFF as Data-URI
+- **NEW** Support optional ZIP compression
 - Saves in both big-endian (default) and little-endian (option) format
 - Arbitrary DPI for both X and Y directions can be set using options.
 - No dependencies
