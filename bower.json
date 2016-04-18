@@ -1,6 +1,6 @@
 {
   "name": "canvas-to-tiff",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "homepage": "https://github.com/epistemex/canvas-to-tiff",
   "authors": [
     "epistemex <github@epistemex.com>"
@@ -8,7 +8,7 @@
   "description": "Converts HTML5 canvas to TIFF file.",
   "main": "canvastotiff.min.js",
   "keywords": [
-    "html5", "canvas", "tiff", "bitmap", "save", "image"
+    "html5", "canvas", "tiff", "bitmap", "save", "image", "compression", "zip"
   ],
   "license": "MIT",
   "ignore": [

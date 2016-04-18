@@ -1,5 +1,5 @@
 /*!
-	canvas-to-tiff version 1.0.0
+	canvas-to-tiff version 1.5.0
 	By Epistemex (c) 2015-2016
 	www.epistemex.com
 	MIT License (this header required)
@@ -43,6 +43,8 @@ var CanvasToTIFF = {
 	 * @param {HTMLCanvasElement} canvas - the canvas element to convert
 	 * @param {function} callback - called when conversion is done. Argument is ArrayBuffer
 	 * @param {object} [options] - an option object
+	 * @param {boolean} [options.compress=false] - enable ZIP compression (requires Pako deflate)
+	 * @param {number} [options.compressionLevel=6] - if compression is enabled, defined compression level [0,6] where 6 is best/slowest.
 	 * @param {boolean} [options.littleEndian=false] - set to true to produce a little-endian based TIFF
 	 * @param {number} [options.dpi=96] - DPI for both X and Y directions. Default 96 DPI (PPI).
 	 * @param {number} [options.dpiX=96] - DPI for X directions (overrides options.dpi).
@@ -64,19 +66,32 @@ var CanvasToTIFF = {
 				entries	   = 0,
 				offsetList = [],
 				idfOffset,
-				sid        = "\x63\x61\x6e\x76\x61\x73\x2d\x74\x6f\x2d\x74\x69\x66\x66\x20\x30\x2e\x34\0",
+				sid        = "\x63\x61\x6e\x76\x61\x73\x2d\x74\x6f\x2d\x74\x69\x66\x66\x20\x31\x2e\x30\0",
 				lsb        = !!options.littleEndian,
 				dpiX	   = +(options.dpiX || options.dpi || 96)|0,
 				dpiY	   = +(options.dpiY || options.dpi || 96)|0,
 				idata      = canvas.getContext("2d").getImageData(0, 0, w, h),
-				length     = idata.data.length,
-				fileLength = iOffset + length,
-				file       = new ArrayBuffer(fileLength),
-				file8      = new Uint8Array(file),
-				view       = new DataView(file),
 				pos        = 0,
 				date       = new Date(),
+				canDeflate = typeof pako !== "undefined" && typeof pako.deflate !== "undefined",
+				compLevel  = typeof options.compressionLevel === "number" ? Math.max(0, Math.min(6, options.compressionLevel)) : 6,
+				result, length, fileLength,
+				file, file8, view,
 				dateStr;
+
+			// compression?
+			if (options.compress) {
+				if (canDeflate)
+					result = pako.deflate(idata.data, {level: compLevel});
+				else
+					console.warn("Cannot compress. Need pako_deflate.js")
+			}
+
+			length = result ? result.length : idata.data.length;
+			fileLength = iOffset + length;
+			file       = new ArrayBuffer(fileLength);
+			file8      = new Uint8Array(file);
+			view       = new DataView(file);
 
 			// Header
 			set16(lsb ? 0x4949 : 0x4d4d);							// II or MM
@@ -89,7 +104,7 @@ var CanvasToTIFF = {
 			addEntry(0x100, 4, 1, w);								// ImageWidth
 			addEntry(0x101, 4, 1, h);								// ImageLength (height)
 			addEntry(0x102, 3, 4, offset, 8);						// BitsPerSample
-			addEntry(0x103, 3, 1, 1);								// Compression
+			addEntry(0x103, 3, 1, result ? 8 : 1);					// Compression (ZIP or nada)
 			addEntry(0x106, 3, 1, 2);								// PhotometricInterpretation: RGB
 			addEntry(0x111, 4, 1, iOffset, 0);						// StripOffsets
 			addEntry(0x115, 3, 1, 4);								// SamplesPerPixel
@@ -130,8 +145,8 @@ var CanvasToTIFF = {
 			dateStr += pad2(date.getHours()) + ":" + pad2(date.getMinutes()) + ":" + pad2(date.getSeconds());
 			setStr(dateStr);
 
-			// Image data here (todo if very large, split into block based copy)
-			file8.set(idata.data, iOffset);
+			// Image data here
+			file8.set(result ? result : idata.data, iOffset);
 
 			// make actual async
 			setTimeout(function() { callback(file) }, me._dly);

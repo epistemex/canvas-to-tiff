@@ -13,6 +13,7 @@ Features
 - Fast and small!
 - All operations are asynchronous and non-blocking
 - Supports alpha channel
+- **NEW** Support optional ZIP compression (requires Pako/Inflate)
 - Can convert Canvas to TIFF as ArrayBuffer
 - Can convert Canvas to TIFF as Blob
 - Can convert Canvas to TIFF as Data-URI
@@ -79,6 +80,12 @@ Issues
 ------
 
 See the [issue tracker](https://github.com/epistemex/canvas-to-tiff/issues) for details.
+
+
+Credits
+-------
+
+- The [pako deflate decompression code](https://github.com/nodeca/pako) was written by Andrey Tupitsin (@anrd83) and Vitaly Puzrin (@puzrin)
 
 
 License
