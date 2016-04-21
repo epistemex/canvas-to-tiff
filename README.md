@@ -45,7 +45,6 @@ Usage
 or before the script section in your HTML file.
 
 To convert the canvas to a TIFF file, call:
-
 ```Javascript
 CanvasToTIFF.toDataURL(canvas, function(uri) {
 	// uri is a Data-URI that can be used as source for images etc.
@@ -54,7 +53,6 @@ CanvasToTIFF.toDataURL(canvas, function(uri) {
 ```
 
 A faster option to Data-URIs is using Blobs:
-
 ```Javascript
 CanvasToTIFF.toBlob(canvas, function(blob) {
 	// blob object can be converted to an objectURL and then
@@ -64,7 +62,6 @@ CanvasToTIFF.toBlob(canvas, function(blob) {
 ```
 
 For convenience, a direct Canvas to ObjectURL method is included:
-
 ```Javascript
 CanvasToTIFF.toObjectURL(canvas, function(url) {
 	// can be used as source for image or download target
@@ -72,7 +69,6 @@ CanvasToTIFF.toObjectURL(canvas, function(url) {
 ```
 
 To convert it to an ArrayBuffer that can be sent over the net:
-
 ```Javascript
 CanvasToTIFF.toArrayBuffer(canvas, function(buffer) {
 	// buffer is ArrayBuffer with the TIFF file
