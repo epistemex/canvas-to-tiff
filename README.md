@@ -46,30 +46,38 @@ or before the script section in your HTML file.
 
 To convert the canvas to a TIFF file, call:
 
-    CanvasToTIFF.toDataURL(canvas, function(uri) {
-        // uri is a Data-URI that can be used as source for images etc.
-        // uri = "data:image/tiff;base64, ...etc...";
-    });
+```Javascript
+CanvasToTIFF.toDataURL(canvas, function(uri) {
+	// uri is a Data-URI that can be used as source for images etc.
+	// uri = "data:image/tiff;base64, ...etc...";
+});
+```
 
 A faster option to Data-URIs is using Blobs:
 
-    CanvasToTIFF.toBlob(canvas, function(blob) {
-        // blob object can be converted to an objectURL and then
-        // set as source for images, or as download target:
-        var url = URL.createObjectURL(blob);
-    });
+```Javascript
+CanvasToTIFF.toBlob(canvas, function(blob) {
+	// blob object can be converted to an objectURL and then
+	// set as source for images, or as download target:
+	var url = URL.createObjectURL(blob);
+});
+```
 
 For convenience, a direct Canvas to ObjectURL method is included:
 
-    CanvasToTIFF.toObjectURL(canvas, function(url) {
-        // can be used as source for image or download target
-    });
+```Javascript
+CanvasToTIFF.toObjectURL(canvas, function(url) {
+	// can be used as source for image or download target
+});
+```
 
 To convert it to an ArrayBuffer that can be sent over the net:
 
-    CanvasToTIFF.toArrayBuffer(canvas, function(buffer) {
-        // buffer is ArrayBuffer with the TIFF file
-    });
+```Javascript
+CanvasToTIFF.toArrayBuffer(canvas, function(buffer) {
+	// buffer is ArrayBuffer with the TIFF file
+});
+```
 
 Also see demos/test.html for sample use of compression and byte-order options.
 
