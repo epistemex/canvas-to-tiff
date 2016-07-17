@@ -1,5 +1,5 @@
 /*!
-	canvas-to-tiff version 1.5.2
+	canvas-to-tiff version 1.5.3
 	By Epistemex (c) 2015-2016
 	www.epistemex.com
 	MIT License (this header required)
@@ -292,7 +292,7 @@ var CanvasToTIFF = {
 					// convert string to Base-64
 					i = 0;
 					l = bs.length;
-					block = 180000;		// !must be divisible by 3
+					block = 180000;		// !must be divisible by 3 -> integer
 
 					(function toBase64() {
 						base64 += btoa(bs.substr(i, block));

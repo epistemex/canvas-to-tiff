@@ -94,6 +94,12 @@ Related
 - [canvas-to-bmp](https://github.com/epistemex/canvas-to-bmp)
 
 
+Contributors
+------------
+
+See contributors [here](https://github.com/epistemex/canvas-to-tiff/graphs/contributors)
+
+
 Credits
 -------
 

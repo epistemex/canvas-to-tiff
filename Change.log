@@ -1,6 +1,9 @@
 Change log for canvas-to-tiff
 -----------------------------
 
+1.5.3
+FIX: Shaved down pako.deflate (removed string methods, minor fixes)
+
 1.5.2
 FIX: Increased compression level limit from 6 to full 9.
 
