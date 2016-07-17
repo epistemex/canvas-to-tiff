@@ -1,35 +1,32 @@
 ﻿canvas-to-tiff
 ==============
 
-Converts a HTML5 canvas bitmap to a TIFF file (blob, data-uri, typed array)
-that can be saved on user's computer or transferred to a server.
+Converts a HTML5 canvas to a TIFF file (blob, data-uri, typed array).
 
-The TIFF file is standard compliant (baseline) and support RGB + alpha
+The TIFF file is standard baseline compliant and support RGB + alpha
 channel as well as compression at various compression levels, with option 
-for byte-order (big-endian or little-endian).
+for byte-order (big-endian or little-endian) and DPI settings.
 
 
 Features
 --------
 
-- Fast and small!
-- All operations are asynchronous and non-blocking
+- Fast and small
+- Asynchronous and non-blocking
 - Supports alpha channel
-- Supports ZIP compression (default)
-- Can convert directly to ArrayBuffer
-- Can convert directly to Blob
-- Can convert directly to Data-URI
-- Can save both in big-endian (default) or little-endian byte order.
-- Arbitrary DPI for both X and Y directions can be set.
-- Documented source incl. HTML version (see docs/ folder)
+- Supports ZIP compression (default but optional)
+- Convert directly to `ArrayBuffer`
+- Convert directly to `Blob`
+- Convert directly to Data-URI
+- Support both big-endian (default) and little-endian byte order
+- Can set arbitrary DPI for X and Y directions
+- Documented source incl. HTML version (see `docs/` folder)
 - Works with all major browsers incl. IE
-- No dependencies
+- No dependencies (pako zlib port if compression is wanted, but isn't required. Included).
 
 
 Install
 -------
-
-**canvas-to-tiff** can be installed in various ways:
 
 - Bower: `bower install canvas-to-tiff`
 - Git using HTTPS: `git clone https://github.com/epistemex/canvas-to-tiff.git`
@@ -41,10 +38,9 @@ Install
 Usage
 -----
 
-**canvas-to-tiff** is easy to use. Just include the script in header 
-or before the script section in your HTML file.
+Include the script in header or before the script section in your HTML file.
 
-To convert the canvas to a TIFF file, call:
+To convert the canvas to a TIFF file:
 ```Javascript
 CanvasToTIFF.toDataURL(canvas, function(uri) {
 	// uri is a Data-URI that can be used as source for images etc.
@@ -75,9 +71,15 @@ CanvasToTIFF.toArrayBuffer(canvas, function(buffer) {
 });
 ```
 
-Also see demos/test.html for sample use of compression and byte-order options.
+Also see `demos/test.html` for sample use of compression and byte-order 
+options.
 
-**NOTE:** Cross-Origin Resource Sharing (CORS) requirements must be fulfilled.
+**NOTE:** As with ordinary canvas Cross-Origin Resource Sharing (CORS) 
+requirements must be fulfilled.
+
+Tip: The pako zlib library can be (and is) included to support ZIP compression.
+It can be left out to reduce code size. CanvasToTIFF will adopt automatically 
+and accordingly if not found and produce uncompressed TIFF files instead.
 
 
 Issues
@@ -95,7 +97,7 @@ Related
 Credits
 -------
 
-- The [pako deflate compression code](https://github.com/nodeca/pako) was written by Andrey Tupitsin (@anrd83) and Vitaly Puzrin (@puzrin)
+- [pako deflate compression code](https://github.com/nodeca/pako) by Andrey Tupitsin (@anrd83) and Vitaly Puzrin (@puzrin)
 
 
 License

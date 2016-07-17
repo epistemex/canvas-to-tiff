@@ -17,7 +17,7 @@
 	<h2>Convert and save TIFF to system via <b>canvas-to-tiff</b></h2>
 	<label><input type="checkbox" id="little-endian"> Little-endian</label>
 	<label><input type="checkbox" id="compress" checked> ZIP compress</label>
-	<label>Compr. level: <input style="width:120px" type="range" id="compLevel" min="0" max="6" value="6"></label>
+	<label>Compr. level: <input style="width:120px" type="range" id="compLevel" min="0" max="9" value="9"></label>
 	<button>Save as TIFF</button> <a></a><br><br>
 	<canvas width="640" height="400"></canvas>
 	<div>Get <a href="https://github.com/epistemex/canvas-to-tiff" target="_blank">canvas-to-tiff</a> at GitHub.
@@ -59,7 +59,7 @@
 			compress: !!document.querySelector("#compress").checked,
 			compressionLevel: +document.querySelector("#compLevel").value,
 			littleEndian: !!document.querySelector("#little-endian").checked,
-			dpi: 72     // does of course not affect the image itself, but is used for arbitrary size relations (optional)
+			dpi: 96     // does of course not affect the image itself, but is used for arbitrary size relations (optional)
 		});
 	}
 

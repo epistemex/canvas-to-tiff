@@ -1,5 +1,5 @@
 /*!
-	canvas-to-tiff version 1.5.1
+	canvas-to-tiff version 1.5.2
 	By Epistemex (c) 2015-2016
 	www.epistemex.com
 	MIT License (this header required)
@@ -37,7 +37,7 @@ var CanvasToTIFF = {
 	 * @param {function} callback - called when conversion is done. Argument is ArrayBuffer
 	 * @param {object} [options] - an option object
 	 * @param {boolean} [options.compress=true] - enable ZIP compression (requires Pako deflate - if not available it will gracefully revert to non-compressed)
-	 * @param {number} [options.compressionLevel=6] - if compression is enabled, defined compression level [0,6] where 6 is best/slowest.
+	 * @param {number} [options.compressionLevel=6] - if compression is enabled, defined compression level [0, 9] where 9 is best/slowest.
 	 * @param {boolean} [options.littleEndian=false] - set to true to produce a little-endian based TIFF
 	 * @param {number} [options.dpi=96] - DPI for both X and Y directions. Default 96 DPI (PPI).
 	 * @param {number} [options.dpiX=96] - DPI for X directions (overrides options.dpi).
@@ -69,7 +69,7 @@ var CanvasToTIFF = {
 				pos        = 0,
 				date       = new Date(),
 				canDeflate = typeof pako !== "undefined" && typeof pako.deflate !== "undefined",
-				compLevel  = typeof options.compressionLevel === "number" ? Math.max(0, Math.min(6, options.compressionLevel)) : 6,
+				compLevel  = typeof options.compressionLevel === "number" ? Math.max(0, Math.min(9, options.compressionLevel)) : 6,
 				result, length, fileLength,
 				file, file8, view,
 				dateStr;

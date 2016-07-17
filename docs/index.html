@@ -72,54 +72,54 @@
 
 
     <section class="readme-section">
-        <article><h1>﻿canvas-to-tiff</h1><p>Converts a HTML5 canvas bitmap to a TIFF file (blob, data-uri, typed array)<br>that can be saved on user's computer or transferred to a server.</p>
-<p>The TIFF file is standard compliant (baseline) and support RGB + alpha<br>channel as well as compression at various compression levels, with option<br>for byte-order (big-endian or little-endian).</p>
+        <article><h1>﻿canvas-to-tiff</h1><p>Converts a HTML5 canvas to a TIFF file (blob, data-uri, typed array).</p>
+<p>The TIFF file is standard baseline compliant and support RGB + alpha<br>channel as well as compression at various compression levels, with option<br>for byte-order (big-endian or little-endian) and DPI settings.</p>
 <h2>Features</h2><ul>
-<li>Fast and small!</li>
-<li>All operations are asynchronous and non-blocking</li>
+<li>Fast and small</li>
+<li>Asynchronous and non-blocking</li>
 <li>Supports alpha channel</li>
-<li>Supports ZIP compression (default)</li>
-<li>Can convert directly to ArrayBuffer</li>
-<li>Can convert directly to Blob</li>
-<li>Can convert directly to Data-URI</li>
-<li>Can save both in big-endian (default) or little-endian byte order.</li>
-<li>Arbitrary DPI for both X and Y directions can be set.</li>
-<li>Documented source incl. HTML version (see docs/ folder)</li>
+<li>Supports ZIP compression (default but optional)</li>
+<li>Convert directly to <code>ArrayBuffer</code></li>
+<li>Convert directly to <code>Blob</code></li>
+<li>Convert directly to Data-URI</li>
+<li>Support both big-endian (default) and little-endian byte order</li>
+<li>Can set arbitrary DPI for X and Y directions</li>
+<li>Documented source incl. HTML version (see <code>docs/</code> folder)</li>
 <li>Works with all major browsers incl. IE</li>
-<li>No dependencies</li>
+<li>No dependencies (pako zlib port if compression is wanted, but isn't required. Included).</li>
 </ul>
-<h2>Install</h2><p><strong>canvas-to-tiff</strong> can be installed in various ways:</p>
-<ul>
+<h2>Install</h2><ul>
 <li>Bower: <code>bower install canvas-to-tiff</code></li>
 <li>Git using HTTPS: <code>git clone https://github.com/epistemex/canvas-to-tiff.git</code></li>
 <li>Git using SSH: <code>git clone git@github.com:epistemex/canvas-to-tiff.git</code></li>
 <li>Download <a href="https://github.com/epistemex/canvas-to-tiff/archive/master.zip">zip archive</a> and extract.</li>
 <li><a href="https://raw.githubusercontent.com/epistemex/canvas-to-tiff/master/canvastotiff.min.js">canvastotiff.min.js</a></li>
 </ul>
-<h2>Usage</h2><p><strong>canvas-to-tiff</strong> is easy to use. Just include the script in header<br>or before the script section in your HTML file.</p>
-<p>To convert the canvas to a TIFF file, call:</p>
-<pre class="prettyprint source"><code>CanvasToTIFF.toDataURL(canvas, function(uri) {
+<h2>Usage</h2><p>Include the script in header or before the script section in your HTML file.</p>
+<p>To convert the canvas to a TIFF file:</p>
+<pre class="prettyprint source lang-Javascript"><code>CanvasToTIFF.toDataURL(canvas, function(uri) {
     // uri is a Data-URI that can be used as source for images etc.
     // uri = &quot;data:image/tiff;base64, ...etc...&quot;;
 });</code></pre><p>A faster option to Data-URIs is using Blobs:</p>
-<pre class="prettyprint source"><code>CanvasToTIFF.toBlob(canvas, function(blob) {
+<pre class="prettyprint source lang-Javascript"><code>CanvasToTIFF.toBlob(canvas, function(blob) {
     // blob object can be converted to an objectURL and then
     // set as source for images, or as download target:
     var url = URL.createObjectURL(blob);
 });</code></pre><p>For convenience, a direct Canvas to ObjectURL method is included:</p>
-<pre class="prettyprint source"><code>CanvasToTIFF.toObjectURL(canvas, function(url) {
+<pre class="prettyprint source lang-Javascript"><code>CanvasToTIFF.toObjectURL(canvas, function(url) {
     // can be used as source for image or download target
 });</code></pre><p>To convert it to an ArrayBuffer that can be sent over the net:</p>
-<pre class="prettyprint source"><code>CanvasToTIFF.toArrayBuffer(canvas, function(buffer) {
+<pre class="prettyprint source lang-Javascript"><code>CanvasToTIFF.toArrayBuffer(canvas, function(buffer) {
     // buffer is ArrayBuffer with the TIFF file
-});</code></pre><p>Also see demos/test.html for sample use of compression and byte-order options.</p>
-<p><strong>NOTE:</strong> Cross-Origin Resource Sharing (CORS) requirements must be fulfilled.</p>
+});</code></pre><p>Also see <code>demos/test.html</code> for sample use of compression and byte-order<br>options.</p>
+<p><strong>NOTE:</strong> As with ordinary canvas Cross-Origin Resource Sharing (CORS)<br>requirements must be fulfilled.</p>
+<p>Tip: The pako zlib library can be (and is) included to support ZIP compression.<br>It can be left out to reduce code size. CanvasToTIFF will adopt automatically<br>and accordingly if not found and produce uncompressed TIFF files instead.</p>
 <h2>Issues</h2><p>See the <a href="https://github.com/epistemex/canvas-to-tiff/issues">issue tracker</a> for details.</p>
 <h2>Related</h2><ul>
 <li><a href="https://github.com/epistemex/canvas-to-bmp">canvas-to-bmp</a></li>
 </ul>
 <h2>Credits</h2><ul>
-<li>The <a href="https://github.com/nodeca/pako">pako deflate compression code</a> was written by Andrey Tupitsin (@anrd83) and Vitaly Puzrin (@puzrin)</li>
+<li><a href="https://github.com/nodeca/pako">pako deflate compression code</a> by Andrey Tupitsin (@anrd83) and Vitaly Puzrin (@puzrin)</li>
 </ul>
 <h2>License</h2><p>Released under <a href="http://choosealicense.com/licenses/mit/">MIT license</a>. You may use this class in both commercial and non-commercial projects provided that full header (minified and developer versions) is included.</p>
 <p><em>&copy; Epistemex 2015-2016</em></p>
@@ -148,7 +148,7 @@
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
-		on Mon Apr 18th 2016 using the <a
+		on Sun Jul 17th 2016 using the <a
 			href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
