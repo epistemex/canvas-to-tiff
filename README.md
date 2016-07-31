@@ -11,10 +11,10 @@ for byte-order (big-endian or little-endian) and DPI settings.
 Features
 --------
 
-- Fast and small
+- Fast
 - Asynchronous and non-blocking
 - Supports alpha channel
-- Supports ZIP compression (default but optional)
+- Supports optional ZIP compression
 - Convert directly to `ArrayBuffer`
 - Convert directly to `Blob`
 - Convert directly to Data-URI
@@ -22,7 +22,7 @@ Features
 - Can set arbitrary DPI for X and Y directions
 - Documented source incl. HTML version (see `docs/` folder)
 - Works with all major browsers incl. IE
-- No dependencies (pako zlib port if compression is wanted, but isn't required. Included).
+- No dependencies (pako deflate if compression is wanted, but isn't required. Included).
 
 
 Install
@@ -86,12 +86,6 @@ Issues
 ------
 
 See the [issue tracker](https://github.com/epistemex/canvas-to-tiff/issues) for details.
-
-
-Related
--------
-
-- [canvas-to-bmp](https://github.com/epistemex/canvas-to-bmp)
 
 
 Contributors

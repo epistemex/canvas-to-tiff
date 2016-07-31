@@ -1,9 +1,10 @@
 /*!
-	canvas-to-tiff version 1.5.3
-	By Epistemex (c) 2015-2016
-	www.epistemex.com
-	MIT License (this header required)
+	canvas-to-tiff 1.5.4
+	(c) epistemex.com 2015-2016
+	MIT License
 */
+
+"use strict";
 
 /**
  * Static helper object that can convert a CORS-compliant canvas context
@@ -22,21 +23,16 @@ var CanvasToTIFF = {
 	_dly: 9,
 
 	/**
-	 * @private
-	 */
-	_error: null,
-
-	/**
 	 * Convert a 2D canvas context to a ArrayBuffer containing a TIFF file.
 	 * Includes the alpha channel. The call is asynchronous so a callback
 	 * must be provided. The image data is ZIP compressed by default.
 	 *
 	 * Note that CORS requirements must be fulfilled.
 	 *
-	 * @param {HTMLCanvasElement} canvas - the canvas element to convert
+	 * @param {HTMLCanvasElement} canvas - the canvas element to export
 	 * @param {function} callback - called when conversion is done. Argument is ArrayBuffer
 	 * @param {object} [options] - an option object
-	 * @param {boolean} [options.compress=true] - enable ZIP compression (requires Pako deflate - if not available it will gracefully revert to non-compressed)
+	 * @param {boolean} [options.compress=true] - enable ZIP compression (requires Pako deflate - if not available it will gracefully revert to uncompressed)
 	 * @param {number} [options.compressionLevel=6] - if compression is enabled, defined compression level [0, 9] where 9 is best/slowest.
 	 * @param {boolean} [options.littleEndian=false] - set to true to produce a little-endian based TIFF
 	 * @param {number} [options.dpi=96] - DPI for both X and Y directions. Default 96 DPI (PPI).
@@ -49,13 +45,12 @@ var CanvasToTIFF = {
 
 		options = options || {};
 
-		this._error = options.onError || null;
-
 		var me = this;
 
 		try {
 			var w          = canvas.width,
 				h          = canvas.height,
+				pos        = 0,
 				offset     = 0,
 				iOffset    = 258,
 				entries	   = 0,
@@ -65,22 +60,15 @@ var CanvasToTIFF = {
 				lsb        = !!options.littleEndian,
 				dpiX	   = +(options.dpiX || options.dpi || 96)|0,
 				dpiY	   = +(options.dpiY || options.dpi || 96)|0,
-				idata      = canvas.getContext("2d").getImageData(0, 0, w, h),
-				pos        = 0,
-				date       = new Date(),
-				canDeflate = typeof pako !== "undefined" && typeof pako.deflate !== "undefined",
+				idata      = canvas.getContext("2d").getImageData(0, 0, w, h),	// throws security error (18) if canvas is tainted
+				canDeflate = typeof this.pako !== "undefined" && typeof this.pako.deflate !== "undefined",
 				compLevel  = typeof options.compressionLevel === "number" ? Math.max(0, Math.min(9, options.compressionLevel)) : 6,
 				result, length, fileLength,
-				file, file8, view,
-				dateStr;
+				file, file8, view;
 
 			// compression?
-			if (typeof options.compress === "boolean" ? options.compress : true) {
-				if (canDeflate)
-					result = pako.deflate(idata.data, {level: compLevel});
-				else
-					console.warn("Cannot compress. See docs.")
-			}
+			if ((typeof options.compress === "boolean" ? options.compress : true) && canDeflate)
+				result = this.pako.deflate(idata.data, {level: compLevel});
 
 			length = result ? result.length : idata.data.length;
 			fileLength = iOffset + length;
@@ -95,11 +83,11 @@ var CanvasToTIFF = {
 
 			// IFD
 			addIDF();												// IDF start
-			addEntry(0xfe, 4, 1, 0);								// NewSubfileType
+			addEntry(0xfe , 4, 1, 0);								// NewSubfileType
 			addEntry(0x100, 4, 1, w);								// ImageWidth
 			addEntry(0x101, 4, 1, h);								// ImageLength (height)
 			addEntry(0x102, 3, 4, offset, 8);						// BitsPerSample
-			addEntry(0x103, 3, 1, result ? 8 : 1);					// Compression (ZIP or nada)
+			addEntry(0x103, 3, 1, result ? 8 : 1);					// Compression (ZIP or raw)
 			addEntry(0x106, 3, 1, 2);								// PhotometricInterpretation: RGB
 			addEntry(0x111, 4, 1, iOffset, 0);						// StripOffsets
 			addEntry(0x115, 3, 1, 4);								// SamplesPerPixel
@@ -115,8 +103,8 @@ var CanvasToTIFF = {
 			// Fields section > long ---------------------------
 
 			// BitsPerSample (2x4), 8,8,8,8 (RGBA)
-			set32(0x00080008);
-			set32(0x00080008);
+			set32(0x80008);
+			set32(0x80008);
 
 			// XRes PPI
 			set32(dpiX);
@@ -130,9 +118,7 @@ var CanvasToTIFF = {
 			setStr(sid);
 
 			// date
-			dateStr = date.getFullYear() + ":" + pad2(date.getMonth() + 1) + ":" + pad2(date.getDate()) + " ";
-			dateStr += pad2(date.getHours()) + ":" + pad2(date.getMinutes()) + ":" + pad2(date.getSeconds());
-			setStr(dateStr);
+			setStr(getDateStr());
 
 			// image data
 			file8.set(result ? result : idata.data, iOffset);
@@ -141,12 +127,15 @@ var CanvasToTIFF = {
 			setTimeout(function() { callback(file) }, me._dly)
 		}
 		catch(err) {
-			if (me._error) me._error(err.toString())
+			if (options.onError) options.onError(err.toString())
 		}
 
-		function pad2(str) {
-			str += "";
-			return str.length === 1 ? "0" + str : str
+		function getDateStr() {
+			var d = new Date();
+			return d.getFullYear() + ":" + pad2(d.getMonth() + 1) + ":" + pad2(d.getDate()) + " "
+					+ pad2(d.getHours()) + ":" + pad2(d.getMinutes()) + ":" + pad2(d.getSeconds());
+
+			function pad2(v) {return v < 10 ? "0" + v : v}
 		}
 
 		// helper method to move current buffer position
@@ -162,7 +151,7 @@ var CanvasToTIFF = {
 
 		function setStr(str) {
 			var i = 0;
-			while(i < str.length) view.setUint8(pos++, str.charCodeAt(i++) & 0xff, lsb);
+			while(i < str.length) view.setUint8(pos++, str.charCodeAt(i++) & 0xff);
 			if (pos & 1) pos++
 		}
 
@@ -225,7 +214,7 @@ var CanvasToTIFF = {
 	 */
 	toBlob: function(canvas, callback, options) {
 		this.toArrayBuffer(canvas, function(file) {
-			callback(new Blob([file], {type: "image/tiff"}));
+			callback(new Blob([file], {type: "image/tiff"}))
 		}, options)
 	},
 

@@ -1,13 +1,67 @@
-/* pako 1.0.1e nodeca/pako
-*
-* Changes by Epistmex:
-* - Removed string related methods - only takes typed array in this version
-* - Minor fixes
-*/
-(function(f){if(typeof exports==="object"&&typeof module !=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.pako = f()}})(function(){var module;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Can't find mod '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';
+/* pako 1.0.3 [MOD] nodeca/pako */
+/*
+	! NOTE: There are changes in this version compared to the official release.
+
+	Epistemex changes:
+	- removed string based methods
+	- assumes Uint8Array view
+	- some minor fixes
+	- moved below CanvasToTIFF namespace -> CanvasToTIFF.pako.deflate (was global)
+ */
+(function(f) {
+	/*if (typeof exports === "object" && typeof module !== "undefined") {
+		module.exports = f()
+	}
+	else if (typeof define === "function" && define.amd) {
+		define([], f)
+	}
+	else {
+		var g;
+		if (typeof window !== "undefined") {
+			g = window
+		}
+		else if (typeof global !== "undefined") {
+			g = global
+		}
+		else if (typeof self !== "undefined") {
+			g = self
+		}
+		else {
+			g = this
+		}
+	}*/
+	CanvasToTIFF.pako = f()
+
+})(function() {
+	var module;
+	return (function e(t, n, r) {
+		function s(o, u) {
+			if (!n[o]) {
+				if (!t[o]) {
+					var a = typeof require === "function" && require;
+					if (!u && a)return a(o, !0);
+					if (i)return i(o, !0);
+					//var f = new Error("Cannot find module '" + o + "'");
+					throw new Error("Cannot find module '" + o + "'"); //f.code = "MODULE_NOT_FOUND";, f
+				}
+				var l = n[o] = {exports: {}};
+				t[o][0].call(l.exports, function(e) {
+					var n = t[o][1][e];
+					return s(n ? n : e)
+				}, l, l.exports, e, t, n, r)
+			}
+			return n[o].exports
+		}
+
+		var i = typeof require == "function" && require;
+		for(var o = 0; o < r.length; o++)s(r[o]);
+		return s
+	})({
+		1: [function(require, module, exports) {
+	'use strict';
 
 var TYPED_OK = "ArrayBuffer" in window;
+
 
 exports.assign = function (obj /*from1, from2, from3, ...*/) {
   var sources = Array.prototype.slice.call(arguments, 1);
@@ -104,12 +158,13 @@ exports.setTyped = function (on) {
 
 exports.setTyped(TYPED_OK);
 
-},{}],2:[function(require){
+
+},{}],2:[function(){
 // String encode/decode helpers
 'use strict';
 
 
-var utils = require('./common');
+//var utils = require('./common');
 
 
 // Quick check if we can use fast array to bin string conversion
@@ -117,15 +172,179 @@ var utils = require('./common');
 // - apply(Array) can fail on Android 2.2
 // - apply(Uint8Array) can fail on iOS 5.1 Safary
 //
+//var STR_APPLY_OK = true;
+//var STR_APPLY_UIA_OK = true;
+
+//try { String.fromCharCode.apply(null, [ 0 ]); } catch (__) { STR_APPLY_OK = false; }
+//try { String.fromCharCode.apply(null, new Uint8Array(1)); } catch (__) { STR_APPLY_UIA_OK = false; }
+
 
 // Table with utf8 lengths (calculated by first byte of sequence)
 // Note, that 5 & 6-byte values and some 4-byte values can not be represented in JS,
 // because max possible codepoint is 0x10ffff
-var _utf8len = new utils.Buf8(256);
+/*var _utf8len = new utils.Buf8(256);
 for (var q = 0; q < 256; q++) {
   _utf8len[q] = (q >= 252 ? 6 : q >= 248 ? 5 : q >= 240 ? 4 : q >= 224 ? 3 : q >= 192 ? 2 : 1);
 }
 _utf8len[254] = _utf8len[254] = 1; // Invalid sequence start
+*/
+
+// convert string to array (typed, when possible)
+/*exports.string2buf = function (str) {
+  var buf, c, c2, m_pos, i, str_len = str.length, buf_len = 0;
+
+  // count binary size
+  for (m_pos = 0; m_pos < str_len; m_pos++) {
+    c = str.charCodeAt(m_pos);
+    if ((c & 0xfc00) === 0xd800 && (m_pos + 1 < str_len)) {
+      c2 = str.charCodeAt(m_pos + 1);
+      if ((c2 & 0xfc00) === 0xdc00) {
+        c = 0x10000 + ((c - 0xd800) << 10) + (c2 - 0xdc00);
+        m_pos++;
+      }
+    }
+    buf_len += c < 0x80 ? 1 : c < 0x800 ? 2 : c < 0x10000 ? 3 : 4;
+  }
+
+  // allocate buffer
+  buf = new utils.Buf8(buf_len);
+
+  // convert
+  for (i = 0, m_pos = 0; i < buf_len; m_pos++) {
+    c = str.charCodeAt(m_pos);
+    if ((c & 0xfc00) === 0xd800 && (m_pos + 1 < str_len)) {
+      c2 = str.charCodeAt(m_pos + 1);
+      if ((c2 & 0xfc00) === 0xdc00) {
+        c = 0x10000 + ((c - 0xd800) << 10) + (c2 - 0xdc00);
+        m_pos++;
+      }
+    }
+    if (c < 0x80) {
+      // one byte
+      buf[i++] = c;
+    } else if (c < 0x800) {
+      // two bytes
+      buf[i++] = 0xC0 | (c >>> 6);
+      buf[i++] = 0x80 | (c & 0x3f);
+    } else if (c < 0x10000) {
+      // three bytes
+      buf[i++] = 0xE0 | (c >>> 12);
+      buf[i++] = 0x80 | (c >>> 6 & 0x3f);
+      buf[i++] = 0x80 | (c & 0x3f);
+    } else {
+      // four bytes
+      buf[i++] = 0xf0 | (c >>> 18);
+      buf[i++] = 0x80 | (c >>> 12 & 0x3f);
+      buf[i++] = 0x80 | (c >>> 6 & 0x3f);
+      buf[i++] = 0x80 | (c & 0x3f);
+    }
+  }
+
+  return buf;
+};*/
+
+// Helper (used in 2 places)
+/*function buf2binstring(buf, len) {
+  // use fallback for big arrays to avoid stack overflow
+  if (len < 65537) {
+    if ((buf.subarray && STR_APPLY_UIA_OK) || (!buf.subarray && STR_APPLY_OK)) {
+      return String.fromCharCode.apply(null, utils.shrinkBuf(buf, len));
+    }
+  }
+
+  var result = '';
+  for (var i = 0; i < len; i++) {
+    result += String.fromCharCode(buf[i]);
+  }
+  return result;
+}*/
+
+
+// Convert byte array to binary string
+/*exports.buf2binstring = function (buf) {
+  return buf2binstring(buf, buf.length);
+};*/
+
+
+// Convert binary string (typed, when possible)
+/*exports.binstring2buf = function (str) {
+  var buf = new utils.Buf8(str.length);
+  for (var i = 0, len = buf.length; i < len; i++) {
+    buf[i] = str.charCodeAt(i);
+  }
+  return buf;
+};*/
+
+
+// convert array to string
+/*exports.buf2string = function (buf, max) {
+  var i, out, c, c_len;
+  var len = max || buf.length;
+
+  // Reserve max possible length (2 words per char)
+  // NB: by unknown reasons, Array is significantly faster for
+  //     String.fromCharCode.apply than Uint16Array.
+  var utf16buf = new Array(len * 2);
+
+  for (out = 0, i = 0; i < len;) {
+    c = buf[i++];
+    // quick process ascii
+    if (c < 0x80) { utf16buf[out++] = c; continue; }
+
+    c_len = _utf8len[c];
+    // skip 5 & 6 byte codes
+    if (c_len > 4) { utf16buf[out++] = 0xfffd; i += c_len - 1; continue; }
+
+    // apply mask on first byte
+    c &= c_len === 2 ? 0x1f : c_len === 3 ? 0x0f : 0x07;
+    // join the rest
+    while (c_len > 1 && i < len) {
+      c = (c << 6) | (buf[i++] & 0x3f);
+      c_len--;
+    }
+
+    // terminated by end of string?
+    if (c_len > 1) { utf16buf[out++] = 0xfffd; continue; }
+
+    if (c < 0x10000) {
+      utf16buf[out++] = c;
+    } else {
+      c -= 0x10000;
+      utf16buf[out++] = 0xd800 | ((c >> 10) & 0x3ff);
+      utf16buf[out++] = 0xdc00 | (c & 0x3ff);
+    }
+  }
+
+  return buf2binstring(utf16buf, out);
+};*/
+
+
+// Calculate max possible position in utf8 buffer,
+// that will not break sequence. If that's not possible
+// - (very small limits) return max size as is.
+//
+// buf[] - utf8 bytes array
+// max   - length limit (mandatory);
+/*exports.utf8border = function (buf, max) {
+  var pos;
+
+  max = max || buf.length;
+  if (max > buf.length) { max = buf.length; }
+
+  // go back from last position, until start of sequence found
+  pos = max - 1;
+  while (pos >= 0 && (buf[pos] & 0xC0) === 0x80) { pos--; }
+
+  // Fuckup - very small and broken sequence,
+  // return max, because we should return something anyway.
+  if (pos < 0) { return max; }
+
+  // If we came to start of buffer - that means vuffer is too small,
+  // return max too.
+  if (pos === 0) { return max; }
+
+  return (pos + _utf8len[buf[pos]] > max) ? pos : max;
+};*/
 
 },{"./common":1}],3:[function(require,module){
 'use strict';
@@ -1570,11 +1789,18 @@ function deflateInit2(strm, level, method, windowBits, memLevel, strategy) {
 
   s.lit_bufsize = 1 << (memLevel + 6); /* 16K elements by default */
 
-  s.pending_buf_size = s.lit_bufsize * 4;
+  s.pending_buf_size = s.lit_bufsize << 2;
+
+  //overlay = (ushf *) ZALLOC(strm, s->lit_bufsize, sizeof(ush)+2);
+  //s->pending_buf = (uchf *) overlay;
   s.pending_buf = new utils.Buf8(s.pending_buf_size);
 
-  s.d_buf = s.lit_bufsize >> 1;
-  s.l_buf = (1 + 2) * s.lit_bufsize;
+  // It is offset from `s.pending_buf` (size is `s.lit_bufsize * 2`)
+  //s->d_buf = overlay + s->lit_bufsize/sizeof(ush);
+  s.d_buf = s.lit_bufsize; // 1 * ..;
+
+  //s->l_buf = s->pending_buf + (1+sizeof(ush))*s->lit_bufsize;
+  s.l_buf = 3 * s.lit_bufsize; // (1+2) * ..
 
   s.level = level;
   s.strategy = strategy;
@@ -2831,7 +3057,7 @@ function scan_tree(s, tree, max_code)
   var prevlen = -1;          /* last emitted length */
   var curlen;                /* length of current code */
 
-  var nextlen = tree[1]	/*.Len*/; /* length of next code */
+  var nextlen = tree[1]/*.Len*/; /* length of next code */
 
   var count = 0;             /* repeat count of the current code */
   var max_count = 7;         /* max repeat count */
@@ -2897,7 +3123,7 @@ function send_tree(s, tree, max_code)
   var prevlen = -1;          /* last emitted length */
   var curlen;                /* length of current code */
 
-  var nextlen = tree[1]	/*.Len*/; /* length of next code */
+  var nextlen = tree[1]/*.Len*/; /* length of next code */
 
   var count = 0;             /* repeat count of the current code */
   var max_count = 7;         /* max repeat count */
@@ -3314,7 +3540,7 @@ var utils        = require('./utils/common');
 var msg          = require('./zlib/messages');
 var ZStream      = require('./zlib/zstream');
 
-var toString = Object.prototype.toString;
+//var toString = Object.prototype.toString;
 
 /* Public constants ==========================================================*/
 /* ===========================================================================*/
@@ -3473,16 +3699,16 @@ function Deflate(options) {
   }
 
   if (opt.dictionary) {
-    var dict;
+    var dict = opt.dictionary;
     // Convert data if needed
-    if (typeof opt.dictionary === 'string') {
+    /*if (typeof opt.dictionary === 'string') {
       // If we need to compress text, change encoding to utf8.
       dict = strings.string2buf(opt.dictionary);
     } else if (toString.call(opt.dictionary) === '[object ArrayBuffer]') {
       dict = new Uint8Array(opt.dictionary);
     } else {
       dict = opt.dictionary;
-    }
+    }*/
 
     status = zlib_deflate.deflateSetDictionary(this.strm, dict);
 
@@ -3533,8 +3759,16 @@ Deflate.prototype.push = function (data, mode) {
   _mode = (mode === ~~mode) ? mode : ((mode === true) ? Z_FINISH : Z_NO_FLUSH);
 
   // Convert data if needed
-  strm.input = data;
+  /*if (typeof data === 'string') {
+    // If we need to compress text, change encoding to utf8.
+    strm.input = strings.string2buf(data);
+  } else if (toString.call(data) === '[object ArrayBuffer]') {
+    strm.input = new Uint8Array(data);
+  } else {
+    strm.input = data;
+  }*/
 
+	strm.input = data;
   strm.next_in = 0;
   strm.avail_in = strm.input.length;
 
@@ -3552,7 +3786,12 @@ Deflate.prototype.push = function (data, mode) {
       return false;
     }
     if (strm.avail_out === 0 || (strm.avail_in === 0 && (_mode === Z_FINISH || _mode === Z_SYNC_FLUSH))) {
-	this.onData(utils.shrinkBuf(strm.output, strm.next_out));
+      /*if (this.options.to === 'string') {
+        this.onData(strings.buf2binstring(utils.shrinkBuf(strm.output, strm.next_out)));
+      } else {
+        this.onData(utils.shrinkBuf(strm.output, strm.next_out));
+      }*/
+		this.onData(utils.shrinkBuf(strm.output, strm.next_out));
     }
   } while ((strm.avail_in > 0 || strm.avail_out === 0) && status !== Z_STREAM_END);
 
@@ -3602,11 +3841,12 @@ Deflate.prototype.onData = function (chunk) {
 Deflate.prototype.onEnd = function (status) {
   // On success - join
   if (status === Z_OK) {
-    if (this.options.to === 'string') {
+    /*if (this.options.to === 'string') {
       this.result = this.chunks.join('');
     } else {
       this.result = utils.flattenChunks(this.chunks);
-    }
+    }*/
+	  this.result = utils.flattenChunks(this.chunks);
   }
   this.chunks = [];
   this.err = status;
@@ -3642,6 +3882,7 @@ Deflate.prototype.onEnd = function (status) {
  * ##### Example:
  *
  * ```javascript
+ * ```javascript
  * var pako = require('pako')
  *   , data = Uint8Array([1,2,3,4,5,6,7,8,9]);
  *
@@ -3659,8 +3900,40 @@ function deflate(input, options) {
   return deflator.result;
 }
 
-//exports.Deflate = Deflate;
+
+/**
+ * deflateRaw(data[, options]) -> Uint8Array|Array|String
+ * - data (Uint8Array|Array|String): input data to compress.
+ * - options (Object): zlib deflate options.
+ *
+ * The same as [[deflate]], but creates raw data, without wrapper
+ * (header and adler32 crc).
+ **/
+/*function deflateRaw(input, options) {
+  options = options || {};
+  options.raw = true;
+  return deflate(input, options);
+}*/
+
+
+/**
+ * gzip(data[, options]) -> Uint8Array|Array|String
+ * - data (Uint8Array|Array|String): input data to compress.
+ * - options (Object): zlib deflate options.
+ *
+ * The same as [[deflate]], but create gzip wrapper instead of
+ * deflate one.
+ **/
+/*function gzip(input, options) {
+  options = options || {};
+  options.gzip = true;
+  return deflate(input, options);
+}*/
+
+exports.Deflate = Deflate;
 exports.deflate = deflate;
+//exports.deflateRaw = deflateRaw;
+//exports.gzip = gzip;
 
 },{"./utils/common":1,"./utils/strings":2,"./zlib/deflate":5,"./zlib/messages":6,"./zlib/zstream":8}]},{},[])("/lib/deflate.js")
 });
