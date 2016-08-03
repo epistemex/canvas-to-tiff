@@ -21,7 +21,7 @@ Features
 - Support both big-endian (default) and little-endian byte order
 - Can set arbitrary DPI for X and Y directions
 - Can obtain a web-gl based canvas as well.
-- Documented source incl. HTML version (see `docs/` folder)
+- Full [documentation](http://epistemex.github.io/canvas-to-tiff/docs/index.html)
 - Works with all major browsers incl. IE
 - No dependencies (ezlib deflate if compression is wanted. Included).
 
