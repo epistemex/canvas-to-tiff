@@ -5,14 +5,12 @@
     "epistemex <github@epistemex.com>"
   ],
   "description": "Converts HTML5 canvas to TIFF file.",
-  "main": "canvastotiff.min.js",
+  "main": "src/canvastotiff.js",
   "keywords": [
     "html5", "canvas", "tiff", "bitmap", "save", "image", "compression", "zip"
   ],
   "license": "MIT",
   "ignore": [
-    "**/.*",
-    "tests",
-    "tuts"
+    "**/.*"
   ]
 }

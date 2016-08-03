@@ -1,5 +1,5 @@
 /*!
-	canvas-to-tiff 1.5.4
+	canvas-to-tiff 1.6.0
 	(c) epistemex.com 2015-2016
 	MIT License
 */
@@ -7,10 +7,11 @@
 "use strict";
 
 /**
- * Static helper object that can convert a CORS-compliant canvas context
- * to a 32-bits TIFF file (buffer, Blob and data-URI). The TIFF is by
- * default saved in big-endian format with ZIP compressed interleaved RGBA
- * data.
+ * Static function to convert a CORS-compliant canvas context
+ * to a 32-bits TIFF file (buffer, Blob and data-URI).
+ *
+ * The TIFF is by default saved in big-endian format as interleaved RGBA
+ * and ZIP compressed data.
  *
  * @type {{toArrayBuffer: Function, toBlob: Function, toDataURL: Function}}
  * @namespace
@@ -20,7 +21,7 @@ var CanvasToTIFF = {
 	/**
 	 * @private
 	 */
-	_dly: 9,
+	_dly: 7,
 
 	/**
 	 * Convert a 2D canvas context to a ArrayBuffer containing a TIFF file.
@@ -32,44 +33,88 @@ var CanvasToTIFF = {
 	 * @param {HTMLCanvasElement} canvas - the canvas element to export
 	 * @param {function} callback - called when conversion is done. Argument is ArrayBuffer
 	 * @param {object} [options] - an option object
-	 * @param {boolean} [options.compress=true] - enable ZIP compression (requires Pako deflate - if not available it will gracefully revert to uncompressed)
+	 * @param {boolean} [options.compress=true] - enable ZIP compression (requires ezlib deflate - if not available it will revert gracefully to uncompressed)
 	 * @param {number} [options.compressionLevel=6] - if compression is enabled, defined compression level [0, 9] where 9 is best/slowest.
 	 * @param {boolean} [options.littleEndian=false] - set to true to produce a little-endian based TIFF
 	 * @param {number} [options.dpi=96] - DPI for both X and Y directions. Default 96 DPI (PPI).
 	 * @param {number} [options.dpiX=96] - DPI for X directions (overrides options.dpi).
 	 * @param {number} [options.dpiY=96] - DPI for Y directions (overrides options.dpi).
-	 * @param {function} [options.onError] - Set error handler (replaces setErrorHandler)
+	 * @param {function} [options.onError] - Set error handler
 	 * @static
 	 */
 	toArrayBuffer: function(canvas, callback, options) {
 
 		options = options || {};
 
-		var me = this;
+		var me 		   = this,
+			w          = canvas.width,
+			h          = canvas.height,
+			pos        = 0,
+			offset     = 0,
+			iOffset    = 258,
+			entries    = 0,
+			offsetList = [],
+			idfOffset,
+			sid        = "canvas-to-tiff 1.6\0",
+			lsb        = !!options.littleEndian,
+			dpiX       = +(options.dpiX || options.dpi || 96) | 0,
+			dpiY       = +(options.dpiY || options.dpi || 96) | 0,
+			canDeflate = typeof ezlib !== "undefined" && typeof ezlib.Deflate !== "undefined",
+			compLevel  = typeof options.compressionLevel === "number" ? Math.max(0, Math.min(9, options.compressionLevel)) : 6,
+			ctx, idata,
+			result, length, fileLength,
+			file, file8, view;
 
-		try {
-			var w          = canvas.width,
-				h          = canvas.height,
-				pos        = 0,
-				offset     = 0,
-				iOffset    = 258,
-				entries	   = 0,
-				offsetList = [],
-				idfOffset,
-				sid        = "\x63\x61\x6e\x76\x61\x73\x2d\x74\x6f\x2d\x74\x69\x66\x66\x20\x31\x2e\x35\0",
-				lsb        = !!options.littleEndian,
-				dpiX	   = +(options.dpiX || options.dpi || 96)|0,
-				dpiY	   = +(options.dpiY || options.dpi || 96)|0,
-				idata      = canvas.getContext("2d").getImageData(0, 0, w, h),	// throws security error (18) if canvas is tainted
-				canDeflate = typeof this.pako !== "undefined" && typeof this.pako.deflate !== "undefined",
-				compLevel  = typeof options.compressionLevel === "number" ? Math.max(0, Math.min(9, options.compressionLevel)) : 6,
-				result, length, fileLength,
-				file, file8, view;
+		/*
+			Check if we can obtain a 2D context for canvas
+		 */
+		ctx = canvas.getContext("2d");
 
-			// compression?
-			if ((typeof options.compress === "boolean" ? options.compress : true) && canDeflate)
-				result = this.pako.deflate(idata.data, {level: compLevel});
+		if (!ctx) {
+			// could not get a 2D context, make a new internal canvas
+			ctx = document.createElement("canvas").getContext("2d");
+			if (ctx) {
+				ctx.canvas.width = w;
+				ctx.canvas.height = h;
+				ctx.drawImage(canvas, 0, 0);
+			}
+			else {
+				if (options.onError) options.onError({msg: "Cannot obtain a 2D context."});
+				else console.log(e);
+			}
+		}
 
+		/*
+			Get image data
+		 */
+		idata = (function(ctx) {
+			try {
+				return ctx.getImageData(0, 0, w, h);	// throws security error (18) if canvas is tainted
+			}
+			catch (err) {
+				if (options.onError) options.onError(err);
+				else console.log(err);
+			}
+		})(ctx);
+
+		/*
+			Compress data if enabled / available
+		 */
+		if (canDeflate && (typeof options.compress === "boolean" ? options.compress : true)) {
+			ezlib.deflateAsync(idata.data, {level: compLevel}, function(e) {
+				result = e.result;
+				finish()
+			}, function(e) {
+				if (options.onError) options.onError(e);
+				else console.log(e);
+			});
+		}
+		else finish();
+
+		/*
+			Build TIFF file
+		 */
+		function finish() {
 			length = result ? result.length : idata.data.length;
 			fileLength = iOffset + length;
 			file       = new ArrayBuffer(fileLength);
@@ -125,9 +170,6 @@ var CanvasToTIFF = {
 
 			// make call async
 			setTimeout(function() { callback(file) }, me._dly)
-		}
-		catch(err) {
-			if (options.onError) options.onError(err.toString())
 		}
 
 		function getDateStr() {
@@ -223,11 +265,10 @@ var CanvasToTIFF = {
 	 * representing the file. The call is asynchronous so a callback
 	 * must be provided.
 	 *
-	 * **Important**: To avoid memory-leakage you must revoke the returned
-	 * ObjectURL when no longer needed:
+	 * When no longer needed the Object-URL should be revoked to release
+	 * memory:
 	 *
-	 *     var _URL = window.URL || window.webkitURL;
-	 *     _URL.revokeObjectURL(url);
+	 *     (window.URL || window.webkitURL).revokeObjectURL(url);
 	 *
 	 * Note that CORS requirement must be fulfilled.
 	 *

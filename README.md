@@ -1,11 +1,11 @@
 ﻿canvas-to-tiff
 ==============
 
-Converts a HTML5 canvas to a TIFF file (blob, data-uri, typed array).
+Converts HTML5 Canvas to a TIFF file (blob, data-uri, typed array).
 
-The TIFF file is standard baseline compliant and support RGB + alpha
-channel as well as compression at various compression levels, with option 
-for byte-order (big-endian or little-endian) and DPI settings.
+The TIFF file is standard baseline compliant and supports RGB + alpha
+channel as well as compression at various compression levels, and with
+option for byte-order (big-endian or little-endian) as well as DPI settings.
 
 
 Features
@@ -14,15 +14,16 @@ Features
 - Fast
 - Asynchronous and non-blocking
 - Supports alpha channel
-- Supports optional ZIP compression
+- Supports optional ZIP compression (async)
 - Convert directly to `ArrayBuffer`
 - Convert directly to `Blob`
 - Convert directly to Data-URI
 - Support both big-endian (default) and little-endian byte order
 - Can set arbitrary DPI for X and Y directions
+- Can obtain a web-gl based canvas as well.
 - Documented source incl. HTML version (see `docs/` folder)
 - Works with all major browsers incl. IE
-- No dependencies (pako deflate if compression is wanted, but isn't required. Included).
+- No dependencies (ezlib deflate if compression is wanted. Included).
 
 
 Install
@@ -41,7 +42,7 @@ Usage
 Include the script in header or before the script section in your HTML file.
 
 To convert the canvas to a TIFF file:
-```Javascript
+```javascript
 CanvasToTIFF.toDataURL(canvas, function(uri) {
 	// uri is a Data-URI that can be used as source for images etc.
 	// uri = "data:image/tiff;base64, ...etc...";
@@ -49,7 +50,7 @@ CanvasToTIFF.toDataURL(canvas, function(uri) {
 ```
 
 A faster option to Data-URIs is using Blobs:
-```Javascript
+```javascript
 CanvasToTIFF.toBlob(canvas, function(blob) {
 	// blob object can be converted to an objectURL and then
 	// set as source for images, or as download target:
@@ -58,28 +59,29 @@ CanvasToTIFF.toBlob(canvas, function(blob) {
 ```
 
 For convenience, a direct Canvas to ObjectURL method is included:
-```Javascript
+```javascript
 CanvasToTIFF.toObjectURL(canvas, function(url) {
 	// can be used as source for image or download target
 });
 ```
 
 To convert it to an ArrayBuffer that can be sent over the net:
-```Javascript
+```javascript
 CanvasToTIFF.toArrayBuffer(canvas, function(buffer) {
 	// buffer is ArrayBuffer with the TIFF file
 });
 ```
 
-Also see `demos/test.html` for sample use of compression and byte-order 
+Also see `www/test.html` for sample use of compression and byte-order 
 options.
 
 **NOTE:** As with ordinary canvas Cross-Origin Resource Sharing (CORS) 
 requirements must be fulfilled.
 
-Tip: The pako zlib library can be (and is) included to support ZIP compression.
-It can be left out to reduce code size. CanvasToTIFF will adopt automatically 
-and accordingly if not found and produce uncompressed TIFF files instead.
+TIP: The *ezlib* library is included to support ZIP compression.
+It can be left out to reduce code size (see `canvastotiff_no_deflate.min.js` [2.7 kb]).
+CanvasToTIFF will adopt automatically and accordingly if not found, and 
+produce a uncompressed TIFF file instead.
 
 
 Issues
@@ -92,12 +94,6 @@ Contributors
 ------------
 
 See contributors [here](https://github.com/epistemex/canvas-to-tiff/graphs/contributors)
-
-
-Credits
--------
-
-- [pako deflate compression code](https://github.com/nodeca/pako) by Andrey Tupitsin (@anrd83) and Vitaly Puzrin (@puzrin)
 
 
 License
