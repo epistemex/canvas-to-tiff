@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>canvas-to-tiff Index</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.lumen.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">canvas-to-tiff</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="CanvasToTIFF.html">CanvasToTIFF</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+		<div class="col-sm-3 col-md-3">
+            <form class="navbar-form" role="search">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-8">
+	
+		<div id="main">
+			
+
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+
+
+
+
+
+    <section class="readme-section">
+        <article><h1>﻿canvas-to-tiff</h1><p>Converts HTML5 Canvas to a TIFF file (blob, data-uri, typed array).</p>
+<p>The generated TIFF file is standard baseline compliant and supports RGB + alpha
+channel as well as compression at various compression levels, and with
+option for byte-order (big-endian or little-endian) as well as DPI settings.</p>
+<h2>Features</h2><ul>
+<li>Fast</li>
+<li>Asynchronous and non-blocking</li>
+<li>Supports alpha channel</li>
+<li>Supports optional ZIP compression</li>
+<li>Convert directly to <code>ArrayBuffer</code></li>
+<li>Convert directly to <code>Blob</code></li>
+<li>Convert directly to Data-URI</li>
+<li>Support both big-endian (default) and little-endian byte order</li>
+<li>Can set arbitrary DPI for X and Y directions</li>
+<li>Can obtain a web-gl based canvas as well.</li>
+<li>Full <a href="http://epistemex.github.io/canvas-to-tiff/docs/index.html">documentation</a></li>
+<li>Works with all major browsers incl. IE</li>
+<li>No dependencies (ezlib deflate if compression is wanted. Included).</li>
+</ul>
+<h2>Install</h2><ul>
+<li>Bower: <code>bower install canvas-to-tiff</code></li>
+<li>Git using HTTPS: <code>git clone https://github.com/epistemex/canvas-to-tiff.git</code></li>
+<li>Git using SSH: <code>git clone git@github.com:epistemex/canvas-to-tiff.git</code></li>
+<li>Download <a href="https://github.com/epistemex/canvas-to-tiff/archive/master.zip">zip archive</a> and extract.</li>
+<li><a href="https://raw.githubusercontent.com/epistemex/canvas-to-tiff/master/canvastotiff.min.js">canvastotiff.min.js</a></li>
+</ul>
+<h2>Usage</h2><p>Include the script in header or before the script section in your HTML file.</p>
+<p>To convert the canvas to a TIFF file as a Data-URI:</p>
+<pre class="prettyprint source lang-javascript"><code>CanvasToTIFF.toDataURL(canvas, function(uri) {
+    // use here
+});</code></pre><p>To convert the canvas to a TIFF file as a blob (much faster than Data-URI
+and more suitable for large files):</p>
+<pre class="prettyprint source lang-javascript"><code>CanvasToTIFF.toBlob(canvas, function(blob) {
+    // use here
+});</code></pre><p>To convert it to an ArrayBuffer:</p>
+<pre class="prettyprint source lang-javascript"><code>CanvasToTIFF.toArrayBuffer(canvas, function(buffer) {
+    // use here
+});</code></pre><p>For convenience, a direct Canvas to ObjectURL method is included:</p>
+<pre class="prettyprint source lang-javascript"><code>CanvasToTIFF.toObjectURL(canvas, function(url) {
+    // use here
+});</code></pre><p>Also see <code>www/test.html</code> for sample use of compression and byte-order 
+options.</p>
+<p><strong>NOTE:</strong> As with ordinary canvas Cross-Origin Resource Sharing (CORS) 
+requirements must be fulfilled.</p>
+<p>TIP: The <em>ezlib</em> library is included to support ZIP compression.
+It can be left out to reduce code size (see <code>canvastotiff_no_deflate.min.js</code> [2.4 kb]).
+CanvasToTIFF will adopt automatically and accordingly if not found, and 
+produce a uncompressed TIFF file instead.</p>
+<h2>Issues</h2><p>See the <a href="https://github.com/epistemex/canvas-to-tiff/issues">issue tracker</a> for details.</p>
+<h2>License</h2><p><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial-ShareAlike 4.0 International</a></p>
+<p><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><img src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="License"></a></p>
+<p><a href="mailto:github@epistemex.com">Contact us</a> if you need a commercial license.</p>
+<p><em>&copy; Epistemex 2015-2017</em></p>
+<p><img src="http://i.imgur.com/wZSsyt8.png" alt="Epistemex"></p></article>
+    </section>
+
+
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+	
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Search results</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<footer>
+
+	<p><b><a href='https://gitlab.com/epistemex/'>Epistemex at GitHub</a></b></p>
+
+
+	<span class="copyright">
+	Copyright &copy; 2015-2017 Epistemex
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
+	
+		on Thu Aug 24th 2017
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+<script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : false,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		SearcherDisplay.init();
+	});
+</script>
+
+</body>
+</html>
