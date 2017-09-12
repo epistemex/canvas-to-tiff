@@ -1,5 +1,5 @@
 /*!
-	canvas-to-tiff 1.6.1
+	canvas-to-tiff 1.6.2
 	(c) epistemex.com 2015-2017
 	License: CC BY-NC-SA 4.0
 */
@@ -56,7 +56,7 @@ var CanvasToTIFF = {
 			offsetList = [],
 			idfOffset,
 			sid        = "canvas-to-tiff 1.6\0",
-			lsb        = !!options.littleEndian,
+			lsb        = options.littleEndian,
 			dpiX       = +(options.dpiX || options.dpi || 96) | 0,
 			dpiY       = +(options.dpiY || options.dpi || 96) | 0,
 			canDeflate = typeof ezlib !== "undefined" && typeof ezlib.Deflate !== "undefined",

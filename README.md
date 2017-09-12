@@ -21,7 +21,7 @@ Features
 - Support both big-endian (default) and little-endian byte order
 - Can set arbitrary DPI for X and Y directions
 - Can obtain a web-gl based canvas as well.
-- Full [documentation](http://epistemex.github.io/canvas-to-tiff/docs/index.html)
+- Full documentation
 - Works with all major browsers incl. IE
 - No dependencies (ezlib deflate if compression is wanted. Included).
 
@@ -33,7 +33,6 @@ Install
 - Git using HTTPS: `git clone https://github.com/epistemex/canvas-to-tiff.git`
 - Git using SSH: `git clone git@github.com:epistemex/canvas-to-tiff.git`
 - Download [zip archive](https://github.com/epistemex/canvas-to-tiff/archive/master.zip) and extract.
-- [canvastotiff.min.js](https://raw.githubusercontent.com/epistemex/canvas-to-tiff/master/canvastotiff.min.js)
 
 
 Usage
@@ -82,20 +81,12 @@ CanvasToTIFF will adopt automatically and accordingly if not found, and
 produce a uncompressed TIFF file instead.
 
 
-Issues
-------
-
-See the [issue tracker](https://github.com/epistemex/canvas-to-tiff/issues) for details.
-
-
 License
 -------
 
 [Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 [![License](https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-
-[Contact us](mailto:github@epistemex.com) if you need a commercial license.
 
 
 *&copy; Epistemex 2015-2017*
