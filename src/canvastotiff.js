@@ -1,5 +1,5 @@
 /*!
-	canvas-to-tiff 1.6.2
+	canvas-to-tiff 1.7.0
 	(c) epistemex.com 2015-2017
 	License: CC BY-NC-SA 4.0
 */
@@ -253,29 +253,6 @@ var CanvasToTIFF = {
 	toBlob: function(canvas, callback, options) {
 		this.toArrayBuffer(canvas, function(file) {
 			callback(new Blob([file], {type: "image/tiff"}))
-		}, options)
-	},
-
-	/**
-	 * Converts a canvas to TIFF file, returns an ObjectURL (for Blob)
-	 * representing the file. The call is asynchronous so a callback
-	 * must be provided.
-	 *
-	 * When no longer needed the Object-URL should be revoked to release
-	 * memory:
-	 *
-	 *     (window.URL || window.webkitURL).revokeObjectURL(url);
-	 *
-	 * Note that CORS requirement must be fulfilled.
-	 *
-	 * @param {HTMLCanvasElement} canvas - the canvas element to convert
-	 * @param {function} callback - called when conversion is done. Argument is a Blob
-	 * @param {object} [options] - an option object - see toArrayBuffer for details
-	 * @static
-	 */
-	toObjectURL: function(canvas, callback, options) {
-		this.toBlob(canvas, function(blob) {
-			callback((window.URL || window.webkitURL).createObjectURL(blob))
 		}, options)
 	},
 
