@@ -1,7 +1,8 @@
 /*!
 	canvas-to-tiff 2.0.0
-	(c) epistemex.com 2015-2017, 2024
-	License: CC BY-NC-SA 4.0
+	(c) epistemex 2015-2016, 2024
+	MIT License
+	Multi-page support by Elias Khoury: 31/08/2016
 */
 
 'use strict';
@@ -30,7 +31,7 @@ const CanvasToTIFF = {
    *
    * Note that CORS requirements must be fulfilled.
    *
-   * @param {HTMLCanvasElement} canvas - the canvas element to export
+   * @param {HTMLCanvasElement|Array} canvases - a single or an array of canvas elements to export
    * @param {function} callback - called when conversion is done. Argument is ArrayBuffer
    * @param {object} [options] - an option object
    * @param {boolean} [options.compress=true] - enable ZIP compression (requires ezlib deflate - if not available it will revert gracefully to uncompressed)
@@ -42,132 +43,167 @@ const CanvasToTIFF = {
    * @param {function} [options.onError] - Set error handler
    * @static
    */
-  toArrayBuffer: function(canvas, callback, options) {
+  toArrayBuffer: function(canvases, callback, options) {
 
-    options = options || {};
+    options = Object.assign({}, options);
 
     const me = this;
-    const w = canvas.width;
-    const h = canvas.height;
-    const iOffset = 258;
+    const images = [];
     const offsetList = [];
     const sid = 'canvas-to-tiff 2.0\0';
-    const lsb = options.littleEndian;
+    const lsb = !!options.littleEndian;
     const dpiX = +(options.dpiX || options.dpi || 96) | 0;
     const dpiY = +(options.dpiY || options.dpi || 96) | 0;
     const canDeflate = typeof ezlib !== 'undefined' && typeof ezlib.Deflate !== 'undefined';
     const compLevel = typeof options.compressionLevel === 'number' ? Math.max(0, Math.min(9, options.compressionLevel)) : 6;
 
+    let iOffset = 258;
     let pos = 0;
     let offset = 0;
+    let IFDOffset = 8;
     let entries = 0;
-    let idfOffset;
     let ctx, idata;
 
-    /*
-      Check if we can obtain a 2D context for canvas
-     */
-    ctx = canvas.getContext('2d');
-
-    if ( !ctx ) {
-      // could not get a 2D context, make a new internal canvas
-      ctx = document.createElement('canvas').getContext('2d');
-      if ( ctx ) {
-        ctx.canvas.width = w;
-        ctx.canvas.height = h;
-        ctx.drawImage(canvas, 0, 0);
+    if (Array.isArray(canvases)) {
+      for(const c of canvases) {
+        images.push(extractData(c, this));
       }
-      else {
-        if ( options.onError ) {
-          options.onError({ msg: 'Cannot obtain a 2D context.' });
+    }
+    else {
+      images.push(extractData(canvases, this));
+    }
+    finish(images);
+
+    function extractData(canvas) {
+      const w = canvas.width;
+      const h = canvas.height;
+      let result = null;
+
+      // Check if we can obtain a 2D context for canvas
+      ctx = canvas.getContext('2d');
+
+      if ( !ctx ) {
+        // could not get a 2D context, make a new internal canvas
+        ctx = document.createElement('canvas').getContext('2d');
+        if ( ctx ) {
+          ctx.canvas.width = w;
+          ctx.canvas.height = h;
+          ctx.drawImage(canvas, 0, 0);
+        }
+        else {
+          if ( options.onError ) {
+            options.onError({ msg: 'Cannot obtain a 2D context.' });
+          }
         }
       }
+
+      // Get image data
+      idata = (function(ctx) {
+        try {
+          return ctx.getImageData(0, 0, w, h);	// throws security error (18) if canvas is tainted
+        }
+        catch(err) {
+          if ( options.onError ) options.onError({ msg: err.toString() });
+        }
+      })(ctx);
+
+      // Compress data if compression is enabled / available
+      if ( canDeflate && (typeof options.compress === 'boolean' ? options.compress : true) ) {
+        ezlib.deflateAsync(idata.data, { level: compLevel }, function(e) {
+          result = e.result;
+        }, function(e) {
+          if ( options.onError ) options.onError(e);
+        });
+
+      }
+      else result = idata;
+
+      return {
+        'result': result,
+        'w'     : w,
+        'h'     : h
+      };
     }
 
-    /*
-      Get image data
-     */
-    idata = (function(ctx) {
-      try {
-        return ctx.getImageData(0, 0, w, h);	// throws security error (18) if canvas is tainted
+    // Build TIFF file
+    function finish(results) {
+
+      let fileLength = 0;
+
+      // Calculate total file length
+      for(const image of results) {
+        fileLength += image.result.length ? image.result.length + iOffset : image.result.data.length + iOffset;
       }
-      catch(err) {
-        if ( options.onError ) options.onError(err);
-      }
-    })(ctx);
 
-    /*
-      Compress data if compression is enabled / available
-     */
-    if ( canDeflate && (typeof options.compress === 'boolean' ? options.compress : true) ) {
-      ezlib.deflateAsync(idata.data, { level: compLevel }, function(e) {
-        finish(e.result);
-      }, function(e) {
-        if ( options.onError ) options.onError(e);
-      });
-    }
-    else finish();
-
-    /*
-      Build TIFF file
-     */
-    function finish(result) {
-
-      const length = result ? result.length : idata.data.length;
-      const fileLength = iOffset + length;
       const file = new ArrayBuffer(fileLength);
       const file8 = new Uint8Array(file);
       const view = new DataView(file);
 
       // Header
-      set16(lsb ? 0x4949 : 0x4d4d);                           // II or MM
-      set16(42);                                              // magic 42
-      set32(8);                                               // offset to first IFD
+      set16(lsb ? 0x4949 : 0x4d4d);      // II or MM
+      set16(42);                         // magic 42
+      set32(IFDOffset);                       // offset to first IFD
 
-      // IFD
-      addIDF();                                                         // IDF start
-      addEntry(0xfe, 4, 1, 0);                    // NewSubfileType
-      addEntry(0x100, 4, 1, w);                         // ImageWidth
-      addEntry(0x101, 4, 1, h);                         // ImageLength (height)
-      addEntry(0x102, 3, 4, offset, 8);       // BitsPerSample
-      addEntry(0x103, 3, 1, result ? 8 : 1);      // Compression (ZIP or raw)
-      addEntry(0x106, 3, 1, 2);                   // PhotometricInterpretation: RGB
-      addEntry(0x111, 4, 1, iOffset, 0);      // StripOffsets
-      addEntry(0x115, 3, 1, 4);                   // SamplesPerPixel
-      addEntry(0x117, 4, 1, length);                    // StripByteCounts
-      addEntry(0x11a, 5, 1, offset, 8);         // XResolution
-      addEntry(0x11b, 5, 1, offset, 8);         // YResolution
-      addEntry(0x128, 3, 1, 2);								    // ResolutionUnit: inch
-      addEntry(0x131, 2, sid.length, offset, getStrLen(sid));	// sid
-      addEntry(0x132, 2, 0x14, offset, 0x14);   // Datetime
-      addEntry(0x152, 3, 1, 2);                   // ExtraSamples
-      endIDF();
+      for(let i = 1; i <= results.length; i++) {
+        const image = results[ i - 1 ];
+        const length = image.result.length ? image.result.length : image.result.data.length;
+        const imageData = image.result.length ? image.result : image.result.data;
+        const nextIFD = length + iOffset;
 
-      // Fields section > long ---------------------------
+        // Reset entries for every IFD
+        entries = 0;
+        offsetList.length = 0;
 
-      // BitsPerSample (2x4), 8,8,8,8 (RGBA)
-      set32(0x80008);
-      set32(0x80008);
+        // IFD
+        addIFD();                                                               // IFD start
+        addEntry(0xfe, 4, 1, 0);                          // NewSubfileType
+        addEntry(0x100, 4, 1, image.w);                         // ImageWidth
+        addEntry(0x101, 4, 1, image.h);                         // ImageLength (height)
+        addEntry(0x102, 3, 4, offset, 8);               // BitsPerSample
+        addEntry(0x103, 3, 1, image.result.length ? 8 : 1); // Compression (ZIP or raw)
+        addEntry(0x106, 3, 1, 2);                         // PhotometricInterpretation: RGB
+        addEntry(0x111, 4, 1, iOffset, 0);             // StripOffsets
+        addEntry(0x115, 3, 1, 4);                         // SamplesPerPixel
+        addEntry(0x117, 4, 1, length);                          // StripByteCounts
+        addEntry(0x11a, 5, 1, offset, 8);               // XResolution
+        addEntry(0x11b, 5, 1, offset, 8);               // YResolution
+        addEntry(0x128, 3, 1, 2);                         // ResolutionUnit: inch
+        addEntry(0x131, 2, sid.length, offset, getStrLen(sid));       // sid
+        addEntry(0x132, 2, 0x14, offset, 0x14);        // Datetime
+        addEntry(0x152, 3, 1, 2);                         // ExtraSamples
+        (i === results.length) ? endIFD() : endIFD(nextIFD);                    // write offset to the next IFD if there is another image
 
-      // XRes PPI
-      set32(dpiX);
-      set32(1);
+        // Fields section > long ---------------------------
 
-      // YRes PPI
-      set32(dpiY);
-      set32(1);
+        // BitsPerSample (2x4), 8,8,8,8 (RGBA)
+        set32(0x80008);
+        set32(0x80008);
 
-      // sid
-      setStr(sid);
+        // XRes PPI
+        set32(dpiX);
+        set32(1);
 
-      // date
-      setStr(getDateStr());
+        // YRes PPI
+        set32(dpiY);
+        set32(1);
 
-      // image data
-      file8.set(result ? result : idata.data, iOffset);
+        // sid
+        setStr(sid);
+
+        // date
+        setStr(getDateStr());
+
+        file8.set(imageData, iOffset);
+
+        // Need to calculate the offsets for the next IFD, strip, and image.
+        pos += length;            // Start writing the next IFD after the image data
+        iOffset += length + 250;  // The strip offsets for the next IFD
+        offset += length + 186;   // The offset for the long values for the next IFD
+      }
 
       // make call async
       setTimeout(function() { callback(file); }, me._dly);
+      return 0;
 
       function getDateStr() {
         const d = new Date();
@@ -195,7 +231,7 @@ const CanvasToTIFF = {
       }
 
       function getStrLen(str) {
-        const l = str.length;
+        let l = str.length;
         return l & 1 ? l + 1 : l;
       }
 
@@ -219,16 +255,17 @@ const CanvasToTIFF = {
         entries++;
       }
 
-      function addIDF(offset) {
-        idfOffset = offset || pos;
+      function addIFD(offset) {
+        IFDOffset = offset || pos;
         pos += 2;
       }
 
-      function endIDF() {
-        view.setUint16(idfOffset, entries, lsb);
-        set32(0);
+      function endIFD(nextImage) {
+        view.setUint16(IFDOffset, entries, lsb);
+        nextImage ? set32(nextImage) : set32(0);
+        //set32(0);
 
-        const delta = 14 + entries * 12;			 // 14 = offset to IDF (8) + IDF count (2) + end pointer (4)
+        const delta = 14 + entries * 12;			 // 14 = offset to IFD (8) + IFD count (2) + end pointer (4)
 
         // compile offsets
         for(let i = 0, p, o; i < offsetList.length; i++) {
@@ -259,7 +296,30 @@ const CanvasToTIFF = {
   },
 
   /**
-   * Converts the canvas to an data-URI representing a TIFF file. The
+   * Converts a canvas to TIFF file, returns an ObjectURL (for Blob)
+   * representing the file. The call is asynchronous so a callback
+   * must be provided.
+   *
+   * When no longer needed the Object-URL should be revoked to release
+   * memory:
+   *
+   *     (window.URL || window.webkitURL).revokeObjectURL(url);
+   *
+   * Note that CORS requirement must be fulfilled.
+   *
+   * @param {HTMLCanvasElement} canvas - the canvas element to convert
+   * @param {function} callback - called when conversion is done. Argument is a Blob
+   * @param {object} [options] - an option object - see toArrayBuffer for details
+   * @static
+   */
+  toObjectURL: function(canvas, callback, options) {
+    this.toBlob(canvas, function(blob) {
+      callback((window.URL || window.webkitURL).createObjectURL(blob));
+    }, options);
+  },
+
+  /**
+   * Converts the canvas to a data-URI representing a TIFF file. The
    * call is asynchronous so a callback must be provided.
    *
    * Note that CORS requirement must be fulfilled.
