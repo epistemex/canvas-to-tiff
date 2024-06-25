@@ -1,7 +1,7 @@
 Change log for canvas-to-tiff
 -----------------------------
 
-See git log.
+2.0.0 See git log.
 
 1.7.0
 REM: the toObjectURL() convenience method removed.
