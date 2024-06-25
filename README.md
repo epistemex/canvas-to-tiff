@@ -7,6 +7,9 @@ The generated TIFF file is standard baseline compliant and supports RGB + alpha
 channel as well as compression at various compression levels, and with
 option for byte-order (big-endian or little-endian) as well as DPI settings.
 
+_Help keep the project alive by supporting the developer:_
+
+[![PayPalMe](https://github.com/epistemex/transformation-matrix-js/assets/70324091/04203267-58f0-402b-9589-e2dee6e7c510)](https://paypal.me/KenNil)
 
 Features
 --------
@@ -29,7 +32,6 @@ Features
 Install
 -------
 
-- Bower: `bower install canvas-to-tiff`
 - Git using HTTPS: `git clone https://github.com/epistemex/canvas-to-tiff.git`
 - Git using SSH: `git clone git@github.com:epistemex/canvas-to-tiff.git`
 - Download [zip archive](https://github.com/epistemex/canvas-to-tiff/archive/master.zip) and extract.
@@ -89,6 +91,6 @@ License
 [![License](https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 
-*&copy; Epistemex 2015-2017*
+*&copy; Epistemex 2015-2017, 2024*
  
 ![Epistemex](http://i.imgur.com/wZSsyt8.png)
