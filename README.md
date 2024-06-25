@@ -82,6 +82,10 @@ It can be left out to reduce code size (see `canvastotiff_no_deflate.min.js` [2.
 CanvasToTIFF will adopt automatically and accordingly if not found, and 
 produce a uncompressed TIFF file instead.
 
+Contributions
+-------------
+
+- Multi-page support by Elias Khoury
 
 License
 -------
